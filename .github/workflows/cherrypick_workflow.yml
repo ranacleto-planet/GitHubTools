@@ -1,0 +1,15 @@
+name: CherryPick Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Example: Action to check out the code
+      - name: Cherry-Picker Bot
+        uses: maxlapides/cherry-picker@v1.0.0
