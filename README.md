@@ -5,5 +5,3 @@ To use, create a GitHub API token (Settings -> Developer Settings -> Personal ac
 ```
 GITHUB_TOKEN = 'add_your_token_here'
 ```
-
-
