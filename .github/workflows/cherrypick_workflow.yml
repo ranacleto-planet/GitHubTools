@@ -1,15 +1,19 @@
-name: CherryPick Workflow
-
+name: Cherry Pick On Comment
 on:
-  push:
-    branches:
-      - main
-
+  issue_comment:
+    types: [created]
 jobs:
-  build:
+  cherry-pick:
+    name: Cherry Pick
+    if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/cherry-pick')
     runs-on: ubuntu-latest
-
     steps:
-      # Example: Action to check out the code
-      - name: Cherry-Picker Bot
-        uses: maxlapides/cherry-picker@v1.0.0
+      - name: Checkout the latest code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+      - name: Automatic Cherry Pick
+        uses: vendoo/gha-cherry-pick@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
