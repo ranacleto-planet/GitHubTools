@@ -1,536 +1,879 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pull Requests Dashboard</title>
-    <style>
-        /* Reset Básico */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        /* Cabeçalho */
-        .header {
-            background-color: #24292e;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2em;
-        }
-		
-		/* Tabs Bar */
-		.tabs-bar {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			background-color: #fff;
-			border-bottom: 1px solid #e1e4e8;
-			padding: 10px 20px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		}
-
-		/* Tabs Section */
-		.tabs {
-			display: flex;
-		}
-
-		.tab {
-		    flex: 0 1 auto; /* Automatically adjusts tab size based on content */
-			text-align: center;
-			padding: 10px 15px;
-			cursor: pointer;
-			font-weight: 500;
-			transition: background-color 0.3s, color 0.3s, border-bottom 0.3s;
-			position: relative;
-		}
-
-		.tab:hover {
-			background-color: #f6f8fa;
-		}
-
-		.tab.active {
-			border-bottom: 3px solid #28a745;
-			color: #28a745;
-		}
-
-        /* Conteúdo das Tabs */
-        .tab-content {
-            display: none;
-            padding: 20px;
-            position: relative;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Títulos das Seções */
-        .section-title {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .section-title .count {
-            background-color: #28a745;
-            color: #fff;
-            border-radius: 12px;
-            padding: 5px 12px;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-
-        /* Tabela */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-		    font-size: 0.9em; /* Adjust font size (smaller than default) */
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f6f8fa;
-            border-bottom: 2px solid #e1e4e8;
-            font-weight: 600;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-		
-		td:nth-child(5), th:nth-child(5) {
-			text-align: center;
-		}
-		
-		td:nth-child(6), th:nth-child(6) {
-			text-align: center;
-		}		
-
-        /* Links */
-        a {
-            color: #000; /* Alterado para preto */
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        a:hover {
-            color: #000; /* Mantém preto no hover */
-            text-decoration: underline;
-        }
-
-        /* Spinner de Carregamento */
-        .spinner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(240, 242, 245, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            border-radius: 5px;
-        }
-
-        .spinner {
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #28a745;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .section-title {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .section-title .count {
-                margin-top: 10px;
-            }
-
-            th, td {
-                padding: 10px;
-            }
-
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab {
-                padding: 10px 0;
-            }
-        }
-		
-		/* Filter Input and Count */
-		.filter-container {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-		}
-
-		.filter-container input {
-			padding: 8px;
-			border: 1px solid #e1e4e8;
-			border-radius: 5px;
-			font-size: 0.9em;
-		}
-
-		.filter-container input:focus {
-			outline: none;
-			border-color: #28a745;
-		}
-
-		.filter-container .count {
-			background-color: #28a745;
-			color: #fff;
-			border-radius: 12px;
-			padding: 5px 12px;
-			font-size: 0.9em;
-			font-weight: 600;
-		}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Pull Requests Dashboard</title>
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
+  <!-- External CSS -->
+  <link rel="stylesheet" href="css/styles-classic.css" id="main-stylesheet" />
+  <link rel="stylesheet" href="css/styles-modern.css" id="alternate-stylesheet" disabled />
+  <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
+  <script src="pako.min.js"></script>
 </head>
+
 <body>
-	<div class="tabs-bar">
-		<div class="tabs">
-			<div class="tab active" data-tab="open-pr">Open Pull Requests</div>
-			<div class="tab" data-tab="closed-pr">Closed Pull Requests</div>
-		</div>
-		<div class="filter-container">
-			<input type="text" id="open-pr-filter" placeholder="Filter by Name, Project, or Owner" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 300px;">
-			<span class="count" id="open-pr-count">0</span>
-		</div>
-	</div>
-    
-    <div id="open-pr" class="tab-content active">
-
-        <div class="spinner-overlay" id="open-pr-spinner">
-            <div class="spinner"></div>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ticket</th>
-                    <th>Pull Request Name</th>
-                    <th>Owner</th>
-                    <th>Project</th>
-                    <th>Date</th>
-                    <th>Approvals</th>
-                </tr>
-            </thead>
-            <tbody id="open-pr-body">
-                <!-- Rows serão carregadas dinamicamente aqui -->
-            </tbody>
-        </table>
+  <!-- Combined Header Controls -->
+  <div class="header-controls">
+    <!-- DARK MODE TOGGLE (Animated Version) -->
+    <div class="dark-mode-toggle" id="dark-mode-toggle" title="Toggle dark/light mode">
+      <i class="fas fa-sun theme-icon sun-icon"></i>
+      <i class="fas fa-moon theme-icon moon-icon"></i>
     </div>
 
-    <div id="closed-pr" class="tab-content">
-        <div class="spinner-overlay" id="closed-pr-spinner">
-            <div class="spinner"></div>
+    <!-- Separator line -->
+    <div class="dark-mode-toggle-separator"></div>
+
+    <!-- Global Search Button -->
+    <button class="global-search-toggle" id="global-search-toggle" title="Global Search">
+      <i class="fas fa-search"></i>
+    </button>
+
+    <!-- Separator line -->
+    <div class="dark-mode-toggle-separator"></div>
+
+    <!-- Global Refresh Button -->
+    <button class="global-refresh-toggle" id="global-refresh-toggle" title="Refresh all pages">
+      <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <!-- Separator line -->
+    <div class="dark-mode-toggle-separator"></div>
+
+    <!-- User Profile Icon -->
+    <button class="user-profile-toggle" id="user-profile-toggle" title="View my activity">
+      <i class="fas fa-user-circle"></i>
+    </button>
+
+    <!-- Separator line -->
+    <div class="dark-mode-toggle-separator"></div>
+
+    <!-- Settings Toggle -->
+    <button class="settings-toggle" id="settings-toggle" title="Change default landing page">
+      <i class="fas fa-cog"></i>
+    </button>
+  </div>
+
+  <!-- Global Search Overlay -->
+  <div class="global-search-overlay" id="global-search-overlay">
+    <div class="global-search-container">
+      <div class="global-search-header">
+        <!-- Input Wrapper remains the same -->
+        <div class="global-search-input-wrapper">
+          <i class="fas fa-search global-search-icon"></i>
+          <input type="text" id="global-search-input" placeholder="Search pull requests..." autocomplete="off" />
+          <div class="global-search-controls">
+            <span class="global-search-count" id="global-search-count"></span>
+            <button class="global-search-close" id="global-search-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ticket</th>
-                    <th>Pull Request Name</th>
-                    <th>Owner</th>
-                    <th>Project</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody id="closed-pr-body">
-                <!-- Rows serão carregadas dinamicamente aqui -->
-            </tbody>
-        </table>
+
+        <!-- Combined Scope Controls -->
+        <div class="global-search-scopes-container">
+          <!-- NEW: Search Mode Toggle -->
+          <div class="search-mode-toggle" id="search-mode-toggle">
+            <span class="scope-label">Search In:</span>
+            <button class="search-mode-button active" data-mode="title"
+              title="Search only in PR titles and ticket numbers">
+              <i class="fas fa-heading"></i> Title
+            </button>
+            <button class="search-mode-button" data-mode="everywhere"
+              title="Search in title, ticket, repo, owner, branches, body, and labels">
+              <i class="fas fa-search-plus"></i> Everywhere
+            </button>
+            <button class="search-mode-button" data-mode="branches"
+              title="Search only in source and target branch names">
+              <i class="fas fa-code-branch"></i> Branches
+            </button>
+          </div>
+
+          <!-- Existing PR Status Scope -->
+          <div class="global-search-scope" id="pr-status-scope">
+            <span class="scope-label">Status:</span>
+            <label><input type="checkbox" id="global-search-scope-open" checked> Open</label>
+            <label><input type="checkbox" id="global-search-scope-closed" checked> Closed</label>
+          </div>
+        </div>
+      </div>
+      <div class="global-search-loading" id="global-search-loading">
+        <!-- Loading content generated by JS -->
+      </div>
+      <div class="global-search-results" id="global-search-results"></div>
+      <div class="global-search-footer">
+        <!-- Footer remains the same -->
+        <div class="global-search-tips">
+          <span><kbd>↑</kbd><kbd>↓</kbd> to navigate</span>
+          <span><kbd>Enter</kbd> to open</span>
+          <span><kbd>Esc</kbd> to close</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER BAR (Tabs) with Loading Indicator -->
+  <div class="tabs-bar">
+    <div class="tabs">
+      <button class="tab active" data-tab="my-activity">My Activity</button>
+      <button class="tab" data-tab="open-pr">Open Pull Requests <span id="open-pr-count"
+          class="count-badge">0</span></button>
+      <button class="tab" data-tab="closed-pr">Closed Pull Requests <span id="closed-pr-count"
+          class="count-badge">0</span></button>
+      <button class="tab" data-tab="projects">Projects</button>
     </div>
 
-    <script type="application/javascript" src="github_token.js"></script>
-    <script>
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-		
-		document.getElementById('open-pr-filter').addEventListener('input', function () {
-			const filterText = this.value.toLowerCase();
-			const rows = document.querySelectorAll('#open-pr-body tr');
-
-			rows.forEach(row => {
-				const name = row.children[1]?.textContent.toLowerCase() || '';
-				const owner = row.children[2]?.textContent.toLowerCase() || '';
-				const project = row.children[3]?.textContent.toLowerCase() || '';
-
-				if (name.includes(filterText) || owner.includes(filterText) || project.includes(filterText)) {
-					row.style.display = '';
-				} else {
-					row.style.display = 'none';
-				}
-			});
-		});
-		
-		let closedPrsLoaded = false;
-
-		tabs.forEach(tab => {
-			tab.addEventListener('click', async () => {
-				tabs.forEach(t => t.classList.remove('active'));
-				tabContents.forEach(content => content.classList.remove('active'));
-
-				tab.classList.add('active');
-				const targetContent = document.getElementById(tab.getAttribute('data-tab'));
-				targetContent.classList.add('active');
-
-				// Load closed PRs only when the "Closed Pull Requests" tab is activated
-				if (tab.getAttribute('data-tab') === 'closed-pr' && !closedPrsLoaded) {
-					closedPrsLoaded = true;
-					document.getElementById('closed-pr-spinner').style.display = 'flex';
-
-					try {
-						const closedPrs = await fetchPullRequests('closed');
-						const closedPrBody = document.getElementById('closed-pr-body');
-
-						closedPrs.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-
-						const closedRows = await Promise.all(
-							closedPrs.map(async (pr) => {
-								const ticketNumber = extractTicketNumber(pr.title);
-								const repoName = pr.repository_url.split('/').pop();
-								return `
-									<tr>
-										<td><a href="https://jira.weareplanet.com/browse/${ticketNumber}" target="_blank">${ticketNumber}</a></td>
-										<td><a href="${pr.html_url}" target="_blank">${pr.title}</a></td>
-										<td>${pr.user.login}</td>
-										<td>${repoName}</td>
-										<td>${formatDate(pr.updated_at)}</td>
-									</tr>
-								`;
-							})
-						);
-
-						closedPrBody.innerHTML = closedRows.join('');
-					} catch (error) {
-						console.error('Error loading closed pull requests:', error);
-					} finally {
-						document.getElementById('closed-pr-spinner').style.display = 'none';
-					}
-				}
-			});
-		});
+    <!-- Header Loading Indicator -->
+    <div id="header-loading">
+      <img src="https://media.tenor.com/G7LfW0O5qb8AAAAi/loading-gif.gif" alt="Loading..." style="height: 15px;" />
+    </div>
+  </div>
 
 
-        async function fetchPullRequests(state) {
-            const token = GITHUB_TOKEN;
-            const teamMembers = [
-                'jfonseca-planet', 'varaujo-planet', 'pvieira-planet', 'dkelly-planet',
-                'bgigante-planet', 'dbarbosa-planet', 'jneto-planet', 'drehm-planet',
-                'cpereira-planet', 'plopes-planet', 'tpinto-planet', 'mcoutinho-planet',
-                'anaritar', 'malves-planet', 'mpinto-planet', 'sassuncao-planet', 
-				'drodrigues-planet', 'jveiga-planet'
-            ];
+  <!-- Updated Settings Panel -->
+  <div class="settings-panel" id="settings-panel">
+    <h3><i class="fas fa-sliders-h"></i> Dashboard Settings</h3>
 
-            const baseUrl = `https://api.github.com/search/issues?q=state:${state}+type:pr+author:${teamMembers.join('+author:')}&per_page=100`;
-            let results = [];
-            let page = 1;
-            let moreResults = true;
+    <div class="settings-option">
+      <p style="margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Default Landing Page:</p>
+      <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">Choose which page loads first when you open the
+        dashboard</p>
 
-            while (moreResults && results.length < 200) {
-                const response = await fetch(`${baseUrl}&page=${page}`, {
-                    headers: {
-                        'Authorization': `token ${token}`
-                    }
-                });
+      <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0 5px; margin-top: 10px;">
+        <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+          <label style="padding: 5px; display: block; cursor: pointer;">
+            <input type="radio" name="default-tab" value="my-activity" checked>
+            <span style="margin-left: 5px; font-weight: 500;">My Activity</span>
+          </label>
+        </div>
 
-                if (!response.ok) {
-                    console.error('Error fetching pull requests:', response.statusText);
-                    break;
-                }
+        <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+          <label style="padding: 5px; display: block; cursor: pointer;">
+            <input type="radio" name="default-tab" value="open-pr">
+            <span style="margin-left: 5px; font-weight: 500;">Open Pull Requests</span>
+          </label>
+        </div>
 
-                const data = await response.json();
-                if (data.items && data.items.length > 0) {
-                    results = results.concat(data.items);
-                    page++;
-                } else {
-                    moreResults = false;
-                }
-            }
+        <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+          <label style="padding: 5px; display: block; cursor: pointer;">
+            <input type="radio" name="default-tab" value="closed-pr">
+            <span style="margin-left: 5px; font-weight: 500;">Closed Pull Requests</span>
+          </label>
+        </div>
 
-            return results.slice(0, 200);
-        }
+        <div style="padding: 8px 0;">
+          <label style="padding: 5px; display: block; cursor: pointer;">
+            <input type="radio" name="default-tab" value="projects">
+            <span style="margin-left: 5px; font-weight: 500;">Projects</span>
+          </label>
+        </div>
+      </div>
+    </div>
 
-        async function fetchApprovals(repoOwner, repoName, pullNumber) {
-            const token = GITHUB_TOKEN;
+    <!-- New Theme Selection Settings -->
+    <div class="settings-option" style="margin-top: 20px;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Theme Selection:</p>
+      <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">Choose the visual theme for the dashboard</p>
+      <div class="settings-control-group" id="theme-selection-group">
+        <div>
+          <label>
+            <input type="radio" name="theme-select" value="classic" checked>
+            <span>Classic</span>
+          </label>
+        </div>
+        <div>
+          <label>
+            <input type="radio" name="theme-select" value="modern">
+            <span>Modern</span>
+          </label>
+        </div>
+      </div>
+    </div>
 
-            // Fetch commits to get the latest commit SHA
-            const commitsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/pulls/${pullNumber}/commits`;
-            const commitsResponse = await fetch(commitsUrl, {
-                headers: { 'Authorization': `token ${token}` }
-            });
+    <!-- New Table Display Settings -->
+    <div class="settings-option" style="margin-top: 20px;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Table Display:</p>
+      <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-top: 5px;">
+        <label style="display: flex; align-items: center; margin-bottom: 5px;">
+          <input type="checkbox" id="full-width-tables" name="full-width-tables">
+          <span style="margin-left: 8px;">Use full-width tables</span>
+        </label>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+          Expands tables to use all available space, helping to prevent text wrapping
+        </p>
 
-            if (!commitsResponse.ok) {
-                console.error('Error fetching commits:', commitsResponse.statusText);
-                return 0;
-            }
+        <!-- New setting for showing branch names -->
+        <label style="display: flex; align-items: center; margin-top: 15px; margin-bottom: 5px;">
+          <input type="checkbox" id="show-branch-names" name="show-branch-names">
+          <span style="margin-left: 8px;">Show branch names</span>
+        </label>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+          Display branch names for pull requests in tables
+        </p>
 
-            const commits = await commitsResponse.json();
-            const latestCommitSha = commits[commits.length - 1].sha;
+        <!-- New setting for showing branch names only if target is not main -->
+        <label style="display: flex; align-items: center; margin-top: 15px; margin-bottom: 5px;">
+          <input type="checkbox" id="show-branch-names-if-not-main" name="show-branch-names-if-not-main">
+          <span style="margin-left: 8px;">Show branch names if target not main</span>
+        </label>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+          Display branch names only when the target branch is not a main branch (main, master, develop)
+        </p>
 
-            // Fetch reviews and filter by the latest commit's SHA and state "APPROVED"
-            const reviewsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/pulls/${pullNumber}/reviews`;
-            const reviewsResponse = await fetch(reviewsUrl, {
-                headers: { 'Authorization': `token ${token}` }
-            });
+        <!-- New setting for smart table mode -->
+        <label style="display: flex; align-items: center; margin-top: 15px; margin-bottom: 5px;">
+          <input type="checkbox" id="smart-table-mode" name="smart-table-mode">
+          <span style="margin-left: 8px;">Enable smart table grouping</span>
+        </label>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+          Groups rows with the same ticket/project/owner to reduce visual repetition and improve readability
+        </p>
 
-            if (!reviewsResponse.ok) {
-                console.error('Error fetching reviews:', reviewsResponse.statusText);
-                return 0;
-            }
+        <!-- New setting for removing PGIT prefix from ticket names -->
+        <label style="display: flex; align-items: center; margin-top: 15px; margin-bottom: 5px;">
+          <input type="checkbox" id="remove-pgit-prefix" name="remove-pgit-prefix">
+          <span style="margin-left: 8px;">Remove PGIT prefix from ticket names</span>
+        </label>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+          Hides "PGIT XXXX" from pull request names since the ticket information is already shown in the ticket column
+        </p>
+      </div>
+    </div>
 
-            const reviews = await reviewsResponse.json();
-            return reviews.filter(review => review.state === 'APPROVED' && review.commit_id === latestCommitSha).length;
-        }
+    <!-- New Performance Settings -->
+    <div class="settings-option" style="margin-top: 20px;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Performance:</p>
+      <div style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-top: 5px;">
+        <label style="display: flex; align-items: center; margin-bottom: 5px;">
+          <input type="checkbox" id="preload-data" name="preload-data">
+          <span style="margin-left: 8px;">Preload all tab data on startup</span>
+        </label>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+          Loads data for all tabs in the background when the app starts. Improves tab switching speed but increases API
+          calls.
+        </p>
+      </div>
+    </div>
 
-        function extractTicketNumber(title) {
-            const match = title.match(/\[(PGIT|PTFI)-\d+\]/);
-            return match ? match[0].slice(1, -1) : 'N/A';
-        }
+    <!-- Combined API Cache and Data Management section with flex layout -->
+    <div class="settings-flex-row">
+      <!-- API Cache Management Card -->
+      <div class="settings-card">
+        <div class="settings-card-title">
+          <i class="fas fa-database"></i> API Cache
+        </div>
+        <div id="cache-stats" class="enhanced-cache-stats">
+          <div class="cache-stat-grid">
+            <div class="cache-stat-item">
+              <div class="cache-stat-label">Entries</div>
+              <div class="cache-stat-value">0</div>
+            </div>
+            <div class="cache-stat-item">
+              <div class="cache-stat-label">Size</div>
+              <div class="cache-stat-value">0 KB</div>
+            </div>
+          </div>
+          <div class="compression-info">
+            <div class="compression-header">
+              <span>Compression</span>
+              <label class="compression-toggle-container" title="Toggle compression">
+                <input type="checkbox" id="compression-toggle" checked>
+                <span class="compression-toggle-switch"></span>
+              </label>
+            </div>
+            <div class="compression-stats">
+              <div class="compression-bar-container" title="Compression ratio">
+                <div class="compression-bar"></div>
+                <div class="compression-text">
+                  <span class="compression-percent">0%</span>
+                  <span class="compression-size">0 KB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        function formatDate(dateString) {
-            const now = new Date();
-            const date = new Date(dateString);
-            const diffMs = now - date;
-            const diffMinutes = Math.floor(diffMs / (1000 * 60));
-            const diffHours = Math.floor(diffMinutes / 60);
+        <!-- New Cache Timeout Controls -->
+        <div class="cache-timeout-controls">
+          <div class="cache-timeout-header">
+            <span>Cache Timeout Settings</span>
+            <div class="cache-timeout-info tooltip">
+              <i class="fas fa-info-circle"></i>
+              <span class="tooltiptext">Longer cache times reduce GitHub API calls but might show outdated data.</span>
+            </div>
+          </div>
 
-            if (now.toDateString() === date.toDateString()) {
-                if (diffHours > 0) {
-                    return `${diffHours}h ago`;
-                } else {
-                    return `${diffMinutes}m ago`;
-                }
-            } else {
-                const options = { month: 'short', day: 'numeric' };
-                return date.toLocaleDateString('en-US', options);
-            }
-        }
+          <div class="cache-timeout-sliders">
+            <div class="cache-timeout-item">
+              <div class="timeout-label-row">
+                <label for="cache-timeout-default">Default</label>
+                <span class="timeout-value" id="cache-timeout-default-value">5 min</span>
+              </div>
+              <div class="slider-container">
+                <input type="range" min="5" max="60" value="5" class="cache-slider" id="cache-timeout-default">
+                <div class="slider-ticks">
+                  <span>5m</span>
+                  <span>15m</span>
+                  <span>30m</span>
+                  <span>60m</span>
+                </div>
+              </div>
+            </div>
 
-        async function loadPullRequests() {
-            // Mostrar spinners
-            document.getElementById('open-pr-spinner').style.display = 'flex';
-            document.getElementById('closed-pr-spinner').style.display = 'flex';
+            <div class="cache-timeout-item">
+              <div class="timeout-label-row">
+                <label for="cache-timeout-repo">Repository Data</label>
+                <span class="timeout-value" id="cache-timeout-repo-value">30 min</span>
+              </div>
+              <div class="slider-container">
+                <input type="range" min="30" max="240" value="30" class="cache-slider" id="cache-timeout-repo">
+                <div class="slider-ticks">
+                  <span>30m</span>
+                  <span>1h</span>
+                  <span>2h</span>
+                  <span>4h</span>
+                </div>
+              </div>
+            </div>
 
-            try {
-                const [openPrs, closedPrs] = await Promise.all([
-                    fetchPullRequests('open'),
-                    fetchPullRequests('closed')
-                ]);
+            <div class="cache-timeout-item">
+              <div class="timeout-label-row">
+                <label for="cache-timeout-commits">Commits</label>
+                <span class="timeout-value" id="cache-timeout-commits-value">10 min</span>
+              </div>
+              <div class="slider-container">
+                <input type="range" min="10" max="120" value="10" class="cache-slider" id="cache-timeout-commits">
+                <div class="slider-ticks">
+                  <span>10m</span>
+                  <span>30m</span>
+                  <span>1h</span>
+                  <span>2h</span>
+                </div>
+              </div>
+            </div>
 
-                const openPrBody = document.getElementById('open-pr-body');
-                const closedPrBody = document.getElementById('closed-pr-body');
+            <div class="cache-timeout-item">
+              <div class="timeout-label-row">
+                <label for="cache-timeout-branches">Branches</label>
+                <span class="timeout-value" id="cache-timeout-branches-value">20 min</span>
+              </div>
+              <div class="slider-container">
+                <input type="range" min="20" max="180" value="20" class="cache-slider" id="cache-timeout-branches">
+                <div class="slider-ticks">
+                  <span>20m</span>
+                  <span>1h</span>
+                  <span>2h</span>
+                  <span>3h</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                // Atualizar contagem de PRs abertas
-                const openPrCount = openPrs.length;
-                document.getElementById('open-pr-count').textContent = openPrCount;
+        <button id="clear-api-cache" class="settings-button settings-button-primary">
+          <i class="fas fa-broom"></i> Clear Cache
+        </button>
+        <p>API responses are cached to improve performance and reduce GitHub API rate limits.</p>
+      </div>
 
-                openPrs.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-                closedPrs.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+      <!-- Data Management Card -->
+      <div class="settings-card">
+        <div class="settings-card-title">
+          <i class="fas fa-trash-alt"></i> Data Management
+        </div>
+        <button id="clear-all-data" class="settings-button settings-button-danger">
+          <i class="fas fa-exclamation-triangle"></i> Reset All Data
+        </button>
+        <p>Reset all settings, cached data, and preferences. The page will reload.</p>
+      </div>
+    </div>
+  </div>
 
-				async function createRowOne(pr) {
-					const ticketNumber = extractTicketNumber(pr.title);
-					const repoName = pr.repository_url.split('/').pop();
-					const repoOwner = pr.repository_url.split('/')[4];
-					const approvals = await fetchApprovals(repoOwner, repoName, pr.number);
+  <!-- =============== MY ACTIVITY (Default Active) =============== -->
+  <div id="my-activity" class="tab-content active">
+    <!-- Section 1: My PRs (Open vs. Closed sub-tabs) -->
+    <div class="my-activity-section">
+      <h2>My PRs</h2>
+      <div class="my-prs-subtabs">
+        <button class="subtab active" data-target="my-open-prs-container">
+          Open PRs <span id="my-open-prs-count" class="count-badge">0</span>
+        </button>
+        <button class="subtab" data-target="my-closed-prs-container">
+          Closed PRs <span id="my-closed-prs-count" class="count-badge">0</span>
+        </button>
+      </div>
+      <div id="my-open-prs-container" class="subtab-content active">
+        <div class="spinner-overlay" id="my-open-prs-spinner" style="display: none;">
+          <div class="spinner"></div>
+        </div>
+        <div class="filter-container">
+          <div class="filter-input-wrapper">
+            <i class="fas fa-search filter-input-icon"></i>
+            <input type="text" id="my-open-prs-filter" class="filter-input"
+              placeholder="Filter by Name, Project, or Ticket..." />
+            <i class="fas fa-times clear-search" title="Clear search"></i>
+          </div>
+          <div class="search-status">
+            <span class="pulse-dot"></span>
+          </div>
+          <label for="my-open-prs-items-per-page">
+            Items per page:
+            <select id="my-open-prs-items-per-page">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <button id="my-open-prs-refresh" class="refresh-button tooltip">
+            <i class="fas fa-sync-alt"></i> Refresh
+            <span class="tooltiptext">Fetch latest data from GitHub</span>
+          </button>
+        </div>
+        <div class="search-results-info" id="my-open-prs-results-info"></div>
+        <table class="table-sortable my-prs-table">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Pull Request Name</th>
+              <th class="project-column">Project</th>
+              <th class="date-column">Date</th>
+              <th>Approvals</th>
+            </tr>
+          </thead>
+          <tbody id="my-open-prs-body"></tbody>
+        </table>
+        <div class="empty-state" style="display: none;">
+          <i class="fas fa-search"></i>
+          <h3>No results found</h3>
+          <p>Try adjusting your search terms or clearing filters to see more results.</p>
+        </div>
+        <div class="pagination" id="my-open-prs-pagination" style="display: none;">
+          <button id="my-open-prs-prev" disabled>Previous</button>
+          <span id="my-open-prs-page-info"></span>
+          <button id="my-open-prs-next">Next</button>
+        </div>
+      </div>
+      <div id="my-closed-prs-container" class="subtab-content">
+        <div class="spinner-overlay" id="my-closed-prs-spinner" style="display: none;">
+          <div class="spinner"></div>
+        </div>
+        <div class="filter-container">
+          <div class="filter-input-wrapper">
+            <i class="fas fa-search filter-input-icon"></i>
+            <input type="text" id="my-closed-prs-filter" class="filter-input"
+              placeholder="Filter by Name, Project, or Ticket..." />
+            <i class="fas fa-times clear-search" title="Clear search"></i>
+          </div>
+          <div class="search-status">
+            <span class="pulse-dot"></span>
+          </div>
+          <label for="my-closed-prs-items-per-page">
+            Items per page:
+            <select id="my-closed-prs-items-per-page">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <button id="my-closed-prs-refresh" class="refresh-button tooltip">
+            <i class="fas fa-sync-alt"></i> Refresh
+            <span class="tooltiptext">Fetch latest data from GitHub</span>
+          </button>
+        </div>
+        <div class="search-results-info" id="my-closed-prs-results-info"></div>
+        <table class="table-sortable my-prs-table">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Pull Request Name</th>
+              <th class="project-column">Project</th>
+              <th class="date-column">Closed Date</th>
+              <th>Approvals</th>
+            </tr>
+          </thead>
+          <tbody id="my-closed-prs-body"></tbody>
+        </table>
+        <div class="empty-state" style="display: none;">
+          <i class="fas fa-search"></i>
+          <h3>No results found</h3>
+          <p>Try adjusting your search terms or clearing filters to see more results.</p>
+        </div>
+        <div class="pagination" id="my-closed-prs-pagination" style="display: none;">
+          <button id="my-closed-prs-prev" disabled>Previous</button>
+          <span id="my-closed-prs-page-info"></span>
+          <button id="my-closed-prs-next">Next</button>
+        </div>
+      </div>
+    </div>
+    <!-- Section 2: My Reviews (Open vs. Closed sub-tabs) -->
+    <div class="my-activity-section">
+      <h2>My Reviews</h2>
+      <div class="my-reviews-subtabs">
+        <button class="subtab active" data-target="my-reviews-open-container">
+          Open <span id="my-reviews-open-count" class="count-badge">0</span>
+        </button>
+        <button class="subtab" data-target="my-reviews-closed-container">
+          Closed <span id="my-reviews-closed-count" class="count-badge">0</span>
+        </button>
+      </div>
+      <div id="my-reviews-open-container" class="subtab-content active">
+        <div class="spinner-overlay" id="my-reviews-open-spinner" style="display: none;">
+          <div class="spinner"></div>
+        </div>
+        <div class="filter-container">
+          <div class="filter-input-wrapper">
+            <i class="fas fa-search filter-input-icon"></i>
+            <input type="text" id="my-reviews-open-filter" class="filter-input"
+              placeholder="Filter by Name, Project, or Owner" />
+            <i class="fas fa-times clear-search" title="Clear search"></i>
+          </div>
+          <div class="search-status">
+            <span class="pulse-dot"></span>
+          </div>
+          <label for="my-reviews-open-items-per-page">
+            Items per page:
+            <select id="my-reviews-open-items-per-page">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <button id="my-reviews-open-refresh" class="refresh-button tooltip">
+            <i class="fas fa-sync-alt"></i> Refresh
+            <span class="tooltiptext">Fetch latest data from GitHub</span>
+          </button>
+        </div>
+        <div class="search-results-info" id="my-reviews-open-results-info"></div>
+        <table class="table-sortable my-prs-table">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Pull Request Name</th>
+              <th>Owner</th>
+              <th>Project</th>
+              <th class="date-column">Date</th>
+              <th>Approvals</th>
+            </tr>
+          </thead>
+          <tbody id="my-reviews-open-body"></tbody>
+        </table>
+        <div class="empty-state" style="display: none;">
+          <i class="fas fa-search"></i>
+          <h3>No results found</h3>
+          <p>Try adjusting your search terms or clearing filters to see more results.</p>
+        </div>
+        <div class="pagination" id="my-reviews-open-pagination" style="display: none;">
+          <button id="my-reviews-open-prev" disabled>Previous</button>
+          <span id="my-reviews-open-page-info"></span>
+          <button id="my-reviews-open-next">Next</button>
+        </div>
+      </div>
+      <div id="my-reviews-closed-container" class="subtab-content">
+        <div class="spinner-overlay" id="my-reviews-closed-spinner" style="display: none;">
+          <div class="spinner"></div>
+        </div>
+        <div class="filter-container">
+          <div class="filter-input-wrapper">
+            <i class="fas fa-search filter-input-icon"></i>
+            <input type="text" id="my-reviews-closed-filter" class="filter-input"
+              placeholder="Filter by Name, Project, or Owner" />
+            <i class="fas fa-times clear-search" title="Clear search"></i>
+          </div>
+          <div class="search-status">
+            <span class="pulse-dot"></span>
+          </div>
+          <label for="my-reviews-closed-items-per-page">
+            Items per page:
+            <select id="my-reviews-closed-items-per-page">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <button id="my-reviews-closed-refresh" class="refresh-button tooltip">
+            <i class="fas fa-sync-alt"></i> Refresh
+            <span class="tooltiptext">Fetch latest data from GitHub</span>
+          </button>
+        </div>
+        <div class="search-results-info" id="my-reviews-closed-results-info"></div>
+        <table class="table-sortable my-prs-table">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Pull Request Name</th>
+              <th>Owner</th>
+              <th>Project</th>
+              <th class="date-column">Closed Date</th>
+              <th>Approvals</th>
+            </tr>
+          </thead>
+          <tbody id="my-reviews-closed-body"></tbody>
+        </table>
+        <div class="empty-state" style="display: none;">
+          <i class="fas fa-search"></i>
+          <h3>No results found</h3>
+          <p>Try adjusting your search terms or clearing filters to see more results.</p>
+        </div>
+        <div class="pagination" id="my-reviews-closed-pagination" style="display: none;">
+          <button id="my-reviews-closed-prev" disabled>Previous</button>
+          <span id="my-reviews-closed-page-info"></span>
+          <button id="my-reviews-closed-next">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-					// Apply a light green background if approvals are 1 or more
-					const approvalStyle = approvals >= 1 ? 'style="background-color: #d4edda;"' : '';
+  <!-- =============== OPEN PR (Tab Content) =============== -->
+  <div id="open-pr" class="tab-content">
+    <div class="filter-container">
+      <div class="filter-input-wrapper">
+        <i class="fas fa-search filter-input-icon"></i>
+        <input type="text" id="open-pr-filter" class="filter-input" placeholder="Filter by Name, Project, or Owner" />
+        <i class="fas fa-times clear-search" title="Clear search"></i>
+      </div>
+      <div class="search-status">
+        <span class="pulse-dot"></span>
+      </div>
+      <label class="tooltip">
+        <input type="checkbox" id="my-open-prs-checkbox" />
+        Show Only My PRs
+        <span class="tooltiptext">Filter to show only PRs you created</span>
+      </label>
+      <label for="open-pr-items-per-page">
+        Items per page:
+        <select id="open-pr-items-per-page">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <button id="open-pr-refresh" class="refresh-button tooltip">
+        <i class="fas fa-sync-alt"></i> Refresh
+        <span class="tooltiptext">Fetch latest data from GitHub</span>
+      </button>
+    </div>
+    <div class="search-results-info" id="open-pr-results-info"></div>
+    <div class="spinner-overlay enhanced-spinner" id="open-pr-spinner" style="display: none;">
+      <div class="spinner"></div>
+    </div>
+    <table class="table-sortable">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Pull Request Name</th>
+          <th>Owner</th>
+          <th>Project</th>
+          <th class="date-column">Date</th>
+          <th>Approvals</th>
+        </tr>
+      </thead>
+      <tbody id="open-pr-body"></tbody>
+    </table>
+    <div class="empty-state" style="display: none;">
+      <i class="fas fa-search"></i>
+      <h3>No results found</h3>
+      <p>Try adjusting your search terms or clearing filters to see more results.</p>
+    </div>
+    <div class="pagination" id="open-pr-pagination">
+      <button id="open-pr-prev" disabled>Previous</button>
+      <span id="open-pr-page-info"></span>
+      <button id="open-pr-next">Next</button>
+    </div>
+  </div>
 
-					return `
-						<tr>
-							<td><a href="https://jira.weareplanet.com/browse/${ticketNumber}" target="_blank">${ticketNumber}</a></td>
-							<td><a href="${pr.html_url}" target="_blank">${pr.title}</a></td>
-							<td>${pr.user.login}</td>
-							<td>${repoName}</td>
-							<td>${formatDate(pr.updated_at)}</td>
-							<td ${approvalStyle}>${approvals}</td>
-						</tr>
-					`;
-				}
-                
-                async function createRowTwo(pr) {
-                    const ticketNumber = extractTicketNumber(pr.title);
-                    const repoName = pr.repository_url.split('/').pop();
-                    const repoOwner = pr.repository_url.split('/')[4];
+  <!-- =============== CLOSED PR (Tab Content) =============== -->
+  <div id="closed-pr" class="tab-content">
+    <div class="filter-container">
+      <div class="filter-input-wrapper">
+        <i class="fas fa-search filter-input-icon"></i>
+        <input type="text" id="closed-pr-filter" class="filter-input" placeholder="Filter by Name, Project, or Owner" />
+        <i class="fas fa-times clear-search" title="Clear search"></i>
+      </div>
+      <div class="search-status">
+        <span class="pulse-dot"></span>
+      </div>
+      <label for="closed-pr-items-per-page">
+        Items per page:
+        <select id="closed-pr-items-per-page">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <button id="closed-pr-refresh" class="refresh-button tooltip">
+        <i class="fas fa-sync-alt"></i> Refresh
+        <span class="tooltiptext">Fetch latest data from GitHub</span>
+      </button>
+    </div>
+    <div class="search-results-info" id="closed-pr-results-info"></div>
+    <div class="spinner-overlay enhanced-spinner" id="closed-pr-spinner" style="display: none;">
+      <div class="spinner"></div>
+    </div>
+    <table class="table-sortable">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Pull Request Name</th>
+          <th>Owner</th>
+          <th>Project</th>
+          <th class="date-column">Date</th>
+          <th>Approvals</th>
+        </tr>
+      </thead>
+      <tbody id="closed-pr-body"></tbody>
+    </table>
+    <div class="empty-state" style="display: none;">
+      <i class="fas fa-search"></i>
+      <h3>No results found</h3>
+      <p>Try adjusting your search terms or clearing filters to see more results.</p>
+    </div>
+    <div class="pagination" id="closed-pr-pagination" style="display: none;">
+      <button id="closed-pr-prev" disabled>Previous</button>
+      <span id="closed-pr-page-info"></span>
+      <button id="closed-pr-next">Next</button>
+    </div>
+  </div>
 
-                    return `
-                        <tr>
-                            <td><a href="https://jira.weareplanet.com/browse/${ticketNumber}" target="_blank">${ticketNumber}</a></td>
-                            <td><a href="${pr.html_url}" target="_blank">${pr.title}</a></td>
-                            <td>${pr.user.login}</td>
-                            <td>${repoName}</td>
-                            <td>${formatDate(pr.updated_at)}</td>
-                        </tr>
-                    `;
-                }
+  <!-- =============== PROJECTS (Tab Content) =============== -->
+  <div id="projects" class="tab-content">
+    <div class="filter-container">
+      <div class="filter-input-wrapper">
+        <i class="fas fa-search filter-input-icon"></i>
+        <input type="text" id="projects-filter" class="filter-input"
+          placeholder="Filter Projects by Name or Description" />
+        <i class="fas fa-times clear-search" title="Clear search"></i>
+      </div>
+      <div class="search-status">
+        <span class="pulse-dot"></span>
+      </div>
+      <label for="projects-items-per-page">
+        Items per page:
+        <select id="projects-items-per-page">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <button id="projects-refresh" class="refresh-button tooltip">
+        <i class="fas fa-sync-alt"></i> Refresh
+        <span class="tooltiptext">Fetch latest data from GitHub</span>
+      </button>
+    </div>
+    <div class="search-results-info" id="projects-results-info"></div>
+    <div class="spinner-overlay enhanced-spinner" id="projects-spinner" style="display: none;">
+      <div class="spinner"></div>
+    </div>
+    <table class="table-sortable projects-table">
+      <thead>
+        <tr>
+          <th>Repository Name</th>
+          <th>Description</th>
+          <th>URL</th>
+          <th>Stars</th>
+          <th>Forks</th>
+          <th class="date-column">Last Updated</th>
+        </tr>
+      </thead>
+      <tbody id="projects-body"></tbody>
+    </table>
+    <div class="empty-state" style="display: none;">
+      <i class="fas fa-search"></i>
+      <h3>No results found</h3>
+      <p>Try adjusting your search terms or clearing filters to see more results.</p>
+    </div>
+    <div class="pagination" id="projects-pagination" style="display: flex;">
+      <button id="projects-prev" disabled>Previous</button>
+      <span id="projects-page-info"></span>
+      <button id="projects-next">Next</button>
+    </div>
+  </div>
 
-                // Preencher PRs Abertas
-                const openRows = await Promise.all(openPrs.map(createRowOne));
-                openPrBody.innerHTML = openRows.join('');
+  <!-- PROJECT DETAILS MODAL -->
+  <div class="modal-overlay" id="project-details-modal">
+    <div class="modal-content" id="modal-content">
+      <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+      <div id="project-details-spinner" class="spinner-overlay" style="display:none;">
+        <div class="spinner"></div>
+      </div>
+      <div class="project-modal-tab-menu">
+        <div class="project-modal-tab active" data-tab="modal-branches">Branches</div>
+        <div class="project-modal-tab" data-tab="modal-open-prs">Open Pull Requests</div>
+        <div class="project-modal-tab" data-tab="modal-closed-prs">Closed Pull Requests</div>
+      </div>
+      <div class="project-modal-tab-content active" id="modal-branches">
+        <div id="branches-container"></div>
+      </div>
+      <div class="project-modal-tab-content" id="modal-open-prs">
+        <div id="open-prs-container"></div>
+      </div>
+      <div class="project-modal-tab-content" id="modal-closed-prs">
+        <div id="closed-prs-container"></div>
+      </div>
+    </div>
+  </div>
 
-                // Preencher PRs Fechadas
-                const closedRows = await Promise.all(closedPrs.map(createRowTwo));
-                closedPrBody.innerHTML = closedRows.join('');
-            } catch (error) {
-                console.error('Error loading pull requests:', error);
-            } finally {
-                // Esconder spinners
-                document.getElementById('open-pr-spinner').style.display = 'none';
-                document.getElementById('closed-pr-spinner').style.display = 'none';
-            }
-        }
+  <!-- PERSON DETAILS MODAL -->
+  <div class="modal-overlay" id="person-details-modal">
+    <div class="modal-content" id="person-modal-content">
+      <button class="modal-close" id="person-modal-close"><i class="fas fa-times"></i></button>
+      <div id="person-details-spinner" class="spinner-overlay" style="display:none;">
+        <div class="spinner"></div>
+      </div>
+      <div class="person-profile-header">
+        <div class="person-avatar-container">
+          <img id="person-avatar" src="" alt="Profile" class="person-avatar">
+        </div>
+        <div class="person-info">
+          <h2 id="person-name" class="person-name"></h2>
+          <div class="person-meta" id="person-meta">
+            <span id="person-login"></span>
+            <a id="person-github-link" href="#" target="_blank">View on GitHub</a>
+          </div>
+        </div>
+      </div>
+      <div class="person-modal-tab-menu">
+        <div class="project-modal-tab active" data-tab="person-open-prs">Open PRs</div>
+        <div class="project-modal-tab" data-tab="person-closed-prs">Closed PRs</div>
+        <div class="project-modal-tab" data-tab="person-branches">Recent Branches</div>
+      </div>
+      <div class="project-modal-tab-content active" id="person-open-prs">
+        <div id="person-open-prs-container"></div>
+      </div>
+      <div class="project-modal-tab-content" id="person-closed-prs">
+        <div id="person-closed-prs-container"></div>
+      </div>
+      <div class="project-modal-tab-content" id="person-branches">
+        <div id="person-branches-container"></div>
+      </div>
+    </div>
+  </div>
 
-        // Chamar a função para carregar as PRs ao carregar a página
-        window.onload = loadPullRequests;
-    </script>
+  <!-- External JS files -->
+  <script src="github_token.js"></script>
+  <script src="github_username.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/data-manager.js"></script>
+  <script src="js/github-api.js"></script>
+  <script src="js/smart-table.js"></script>
+  <script src="js/ui-controller.js"></script>
+  <script src="js/search-controller.js"></script>
+  <script src="js/pr-controller.js"></script>
+  <script src="js/projects-controller.js"></script>
+  <script src="js/app.js"></script>
 </body>
+
 </html>
