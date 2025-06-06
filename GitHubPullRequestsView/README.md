@@ -10,3 +10,4 @@ GITHUB_TOKEN = 'add_your_token_here'
 ```
 GITHUB_USERNAME = 'YOUR_USERNAME'
 ```
+![imagem](https://github.com/user-attachments/assets/8cc34ed1-2f7b-4366-87a1-f2ad7bdbecf7)
