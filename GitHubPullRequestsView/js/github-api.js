@@ -395,21 +395,21 @@ async function fetchMergeConflictStatus(owner, repo, prNumber) {
   try {
     const resp = await safeFetch(url); // Uses same cache as fetchPRDetails
     if (!resp) return false; // Handle null response from safeFetch
-    
+
     const prData = await resp.json();
-    
+
     // GitHub API returns mergeable: null when it's still calculating
     // mergeable: false when there are conflicts
     // mergeable: true when it can be merged
     if (prData.mergeable === false) {
       return true; // Has merge conflicts
     }
-    
+
     // Additional check: if mergeable_state indicates conflicts
     if (prData.mergeable_state === 'dirty' || prData.mergeable_state === 'conflicts') {
       return true; // Has merge conflicts
     }
-    
+
     return false; // No merge conflicts
   } catch (error) {
     console.warn(`Failed to fetch merge conflict status for ${owner}/${repo}#${prNumber}:`, error.message);
@@ -500,7 +500,7 @@ async function fetchMyClosedReviews(page = 1, perPage = 10, forceRefresh = false
 * @param {boolean} forceRefresh
 * @returns {Promise<Object|null>} { items: Array<enriched PR>, total_count: number }
 */
-async function fetchPullRequests(state, pageNumber, myOnly = false, perPage = null, forceRefresh = false) {
+async function fetchPullRequests(state, pageNumber, myOnly = false, perPage = null, forceRefresh = false, countOnly = false) {
   // Determine items per page
   const itemsPerPage = perPage ?? (state === 'open' ? preferences.openPrItemsPerPage : preferences.closedPrItemsPerPage);
   const org = 'weareplanet'; // Make configurable?
@@ -518,8 +518,7 @@ async function fetchPullRequests(state, pageNumber, myOnly = false, perPage = nu
       'jfonseca-planet', 'varaujo-planet', 'pvieira-planet', 'dkelly-planet',
       'bgigante-planet', 'dbarbosa-planet', 'jneto-planet', 'drehm-planet',
       'cpereira-planet', 'plopes-planet', 'tpinto-planet', 'mcoutinho-planet',
-      'anaritar', 'malves-planet', 'mpinto-planet', 'sassuncao-planet',
-      'drodrigues-planet', 'jveiga-planet', 'ranacleto-planet'
+      'anaritar', 'mpinto-planet', 'drodrigues-planet', 'jveiga-planet', 'ranacleto-planet'
       // Add/remove members as needed
     ];
     const authorsQuery = teamMembers.map(m => `author:${m}`).join('+');
@@ -532,6 +531,12 @@ async function fetchPullRequests(state, pageNumber, myOnly = false, perPage = nu
     const response = await safeFetch(url, {}, forceRefresh);
     if (!response) return { items: [], total_count: 0 }; // Handle null response
     const data = await response.json();
+
+    // If countOnly is true, return only the total_count without enriching items
+    if (countOnly) {
+      return { items: [], total_count: data.total_count };
+    }
+
     const enrichedItems = await enrichPRList(data.items, state === 'open');
     return { items: enrichedItems, total_count: data.total_count };
   } catch (error) {
@@ -778,16 +783,16 @@ async function fetchDeveloperPRs(username, forceRefresh = false) {
     // Fetch open PRs
     const openUrl = `https://api.github.com/search/issues?q=type:pr+author:${username}+state:open&sort=updated&order=desc&per_page=30`;
     const openResp = await safeFetch(openUrl, {}, forceRefresh);
-    
+
     // Fetch closed PRs
     const closedUrl = `https://api.github.com/search/issues?q=type:pr+author:${username}+state:closed&sort=updated&order=desc&per_page=30`;
     const closedResp = await safeFetch(closedUrl, {}, forceRefresh);
-    
+
     if (!openResp || !closedResp) return [];
-    
+
     const openPRs = await openResp.json();
     const closedPRs = await closedResp.json();
-    
+
     // Combine and return only the actual PR items
     return [...(openPRs.items || []), ...(closedPRs.items || [])];
   } catch (error) {

@@ -388,14 +388,14 @@ async function renderSectionItems(sectionId, items, isFiltering, filterVal) {
   if (smartTableHtml) {
       // Use smart table rendering
       tbody.innerHTML = smartTableHtml;
-      
+
       // Update global smart table toggle button after rendering
       setTimeout(() => {
           if (typeof updateGlobalToggleButton === 'function') {
               updateGlobalToggleButton();
           }
       }, 50);
-      
+
       return;
   }
 
@@ -439,15 +439,15 @@ async function renderSectionItems(sectionId, items, isFiltering, filterVal) {
       // --- Branch Info ---
       let branchHtml = '';
       const shouldShowBranches = preferences.showBranchNames || preferences.showBranchNamesIfNotMain;
-      
+
       if (shouldShowBranches && pr.branchInfo) {
           const source = pr.branchInfo.source || '';
           const target = pr.branchInfo.target || '';
-          
+
           // Check if target is a main branch (common main branch names)
           const mainBranches = ['main', 'master', 'develop', 'development', 'dev'];
           const isTargetMainBranch = target && mainBranches.includes(target.toLowerCase());
-          
+
           // Determine if we should show branches based on the settings
           let showBranches = false;
           if (preferences.showBranchNames) {
@@ -455,7 +455,7 @@ async function renderSectionItems(sectionId, items, isFiltering, filterVal) {
           } else if (preferences.showBranchNamesIfNotMain && !isTargetMainBranch) {
               showBranches = true; // Show only if target is not a main branch
           }
-          
+
           if (showBranches && source) {
               const sourceDisplay = highlightMatches(truncateBranchName(source), filterVal);
               const targetDisplay = highlightMatches(target, filterVal);
@@ -517,9 +517,9 @@ async function renderSectionItems(sectionId, items, isFiltering, filterVal) {
       // Owner (Conditional)
       if (!isMyPrSection) {
           // Add click handler for developer details
-          rowHtml += `<td><a href="javascript:void(0)" class="developer-link" 
-                        data-username="${escapeHTML(ownerRaw)}" 
-                        data-displayname="${escapeHTML(ownerName)}" 
+          rowHtml += `<td><a href="javascript:void(0)" class="developer-link"
+                        data-username="${escapeHTML(ownerRaw)}"
+                        data-displayname="${escapeHTML(ownerName)}"
                         onclick="showDeveloperDetails('${escapeHTML(ownerRaw)}', '${escapeHTML(ownerName)}')">${ownerNameDisplay}</a></td>`;
       }
       // Project
@@ -540,17 +540,17 @@ async function renderSectionItems(sectionId, items, isFiltering, filterVal) {
   developerLinks.forEach(link => {
     const username = link.getAttribute('data-username');
     const displayName = link.getAttribute('data-displayname');
-    
+
     // Remove existing onclick to avoid duplicate handlers
     link.removeAttribute('onclick');
-    
+
     // Add click event listener
     link.addEventListener('click', (e) => {
       e.preventDefault();
       showDeveloperDetails(username, displayName);
     });
   });
-  
+
   // Update global smart table toggle button after rendering (for regular tables too)
   setTimeout(() => {
       if (typeof updateGlobalToggleButton === 'function') {
@@ -641,7 +641,7 @@ async function updateMainTabCounts() {
           element.textContent = cachedLength; // Show length as temporary count
           // If it seems capped, try fetching the real total in background
           if (cachedLength >= MAX_FILTER_ITEMS) {
-               fetchPullRequests(state, 1, preferences.myOpenPrsOnly, 1) // Fetch page 1, 1 item RAW
+               fetchPullRequests(state, 1, preferences.myOpenPrsOnly, 1, false, true) // Fetch page 1, 1 item RAW, countOnly=true
                   .then(data => { if (data?.total_count !== undefined) element.textContent = data.total_count; })
                   .catch(() => { /* Keep existing count on error */ });
           }
@@ -651,7 +651,7 @@ async function updateMainTabCounts() {
       // 3. Fetch total count from API (minimal request - page 1, 1 item)
       element.textContent = '...'; // Indicate loading
       try {
-          const data = await fetchPullRequests(state, 1, preferences.myOpenPrsOnly, 1); // Fetch RAW page 1, 1 item
+          const data = await fetchPullRequests(state, 1, preferences.myOpenPrsOnly, 1, false, true); // Fetch RAW page 1, 1 item, countOnly=true
           element.textContent = data?.total_count !== undefined ? data.total_count : '0';
       } catch {
           element.textContent = '?'; // Indicate error
