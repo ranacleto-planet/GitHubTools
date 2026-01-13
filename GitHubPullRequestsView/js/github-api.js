@@ -518,7 +518,7 @@ async function fetchPullRequests(state, pageNumber, myOnly = false, perPage = nu
       'jfonseca-planet', 'varaujo-planet', 'pvieira-planet', 'dkelly-planet',
       'bgigante-planet', 'dbarbosa-planet', 'jneto-planet', 'drehm-planet',
       'cpereira-planet', 'plopes-planet', 'tpinto-planet', 'mcoutinho-planet',
-      'anaritar', 'mpinto-planet', 'drodrigues-planet', 'jveiga-planet', 'ranacleto-planet'
+      'anaritar', 'mpinto-planet', 'drodrigues-planet', 'jveiga-planet', 'ranacleto-planet', 'besilva-planet'
       // Add/remove members as needed
     ];
     const authorsQuery = teamMembers.map(m => `author:${m}`).join('+');
